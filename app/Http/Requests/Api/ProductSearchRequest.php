@@ -12,7 +12,7 @@ use Illuminate\Validation\Rule;
 class ProductSearchRequest extends FormRequest
 {
     public const MAX_PER_PAGE = 50;
-    public const DEFAULT_PER_PAGE = 15;
+    public const DEFAULT_PER_PAGE = 10;
 
     public function authorize(): bool
     {

@@ -1,5 +1,7 @@
 ﻿# Product Search System
 
+![Product Search UI](public/images/product-search-demo.svg)
+
 A Laravel-based product search API designed for large datasets, advanced filtering, flexible sorting, and paginated responses.
 
 > The project is already prepared for a dataset of 1,000,000 products. The focus is on database-driven performance, proper indexing, and searching without loading all rows into memory.
@@ -20,10 +22,12 @@ This project provides a product search API with:
 ## Features implemented
 
 ### Main endpoint
+
 - GET /api/products/search
 - GET /api/v1/products/search
 
 ### Supported query parameters
+
 - q: search text across product name and description
 - min_price: minimum price
 - max_price: maximum price
@@ -35,6 +39,7 @@ This project provides a product search API with:
 - page: page number
 
 ### Behavior
+
 - Empty search returns the normal product listing
 - Invalid numeric values and invalid enum values are rejected with 422
 - Missing resources return a unified error envelope
@@ -73,7 +78,7 @@ app/
     ProductSearchService.php
   Support/
     SearchTermParser.php
-``` 
+```
 
 ### Why this structure is effective
 
@@ -90,12 +95,14 @@ app/
 ### Tables
 
 #### categories
+
 - id
 - name
 - slug
 - timestamps
 
 #### products
+
 - id
 - category_id
 - name
@@ -154,33 +161,33 @@ while still keeping the query efficient and database-driven.
 
 ```json
 {
-  "success": true,
-  "message": "Products retrieved successfully.",
-  "data": [
-    {
-      "id": 15,
-      "name": "Gaming Laptop",
-      "description": "High-performance gaming laptop",
-      "price": 429.99,
-      "is_available": true,
-      "category": {
-        "id": 3,
-        "name": "Electronics",
-        "slug": "electronics"
-      },
-      "created_at": "2026-10-12T10:00:00+00:00"
+    "success": true,
+    "message": "Products retrieved successfully.",
+    "data": [
+        {
+            "id": 15,
+            "name": "Gaming Laptop",
+            "description": "High-performance gaming laptop",
+            "price": 429.99,
+            "is_available": true,
+            "category": {
+                "id": 3,
+                "name": "Electronics",
+                "slug": "electronics"
+            },
+            "created_at": "2026-10-12T10:00:00+00:00"
+        }
+    ],
+    "meta": {
+        "pagination": {
+            "current_page": 1,
+            "per_page": 10,
+            "count": 10,
+            "has_more": true,
+            "next_page_url": "http://localhost:8000/api/products/search?q=laptop&page=2",
+            "prev_page_url": null
+        }
     }
-  ],
-  "meta": {
-    "pagination": {
-      "current_page": 1,
-      "per_page": 10,
-      "count": 10,
-      "has_more": true,
-      "next_page_url": "http://localhost:8000/api/products/search?q=laptop&page=2",
-      "prev_page_url": null
-    }
-  }
 }
 ```
 
@@ -188,14 +195,12 @@ while still keeping the query efficient and database-driven.
 
 ```json
 {
-  "success": false,
-  "message": "The given data was invalid.",
-  "data": null,
-  "errors": {
-    "per_page": [
-      "The per page value may not exceed 50."
-    ]
-  }
+    "success": false,
+    "message": "The given data was invalid.",
+    "data": null,
+    "errors": {
+        "per_page": ["The per page value may not exceed 50."]
+    }
 }
 ```
 
@@ -203,9 +208,9 @@ while still keeping the query efficient and database-driven.
 
 ```json
 {
-  "success": false,
-  "message": "Resource not found.",
-  "data": null
+    "success": false,
+    "message": "Resource not found.",
+    "data": null
 }
 ```
 
@@ -236,6 +241,46 @@ For large datasets, the biggest gains come from:
 4. avoiding broad full scans in application code
 
 This implementation follows those principles.
+
+### Latest performance upgrade
+
+The search flow was tuned to respond faster in real usage:
+
+- default pagination was reduced from 15 to 10 results to reduce database workload
+- extra composite indexes were added for high-frequency filter/sort patterns
+- the API still keeps SQL-based filtering and sorting instead of loading all products in memory
+
+For an existing local database, run:
+
+```bash
+php artisan migrate
+```
+
+to apply the new search indexes.
+
+## Quick Blade API demo
+
+The project now includes a light Blade-based testing dashboard for the API.
+
+Open the app in the browser:
+
+```bash
+php artisan serve
+```
+
+Then visit:
+
+- http://localhost:8000
+
+The page includes:
+
+- search form for q, category, price range, stock status, sort, direction, and page size
+- real-time API request preview
+- response cards for products
+- raw JSON output for debugging and Postman-style validation
+- a clean modern design for quick manual testing without external tools
+
+This is useful when you want to validate the search behavior visually before sending requests from Postman or another client.
 
 ## Local setup
 
