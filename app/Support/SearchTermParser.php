@@ -13,7 +13,6 @@ final class SearchTermParser
 
     public function __construct(string $raw)
     {
-        // Remove all non-alphanumeric characters (except whitespace) and split into tokens
         $clean = preg_replace('/[^\p{L}\p{N}\s]+/u', ' ', $raw) ?? '';
         $tokens = preg_split('/\s+/u', mb_strtolower(trim($clean)), -1, PREG_SPLIT_NO_EMPTY) ?: [];
 
@@ -25,31 +24,38 @@ final class SearchTermParser
         return $this->tokens === [];
     }
 
-    /**
-     * Returns a string suitable for a boolean full-text search query, with all usable tokens prefixed with "+" and suffixed with "*".
-     * Tokens shorter than MIN_FULLTEXT_TOKEN_LENGTH are ignored.
-     */
     public function toBooleanQuery(): ?string
     {
         $usable = array_filter(
             $this->tokens,
-            fn (string $t) => mb_strlen($t) >= self::MIN_FULLTEXT_TOKEN_LENGTH
+            fn (string $token) => mb_strlen($token) >= self::MIN_FULLTEXT_TOKEN_LENGTH
         );
 
         if ($usable === []) {
             return null;
         }
 
-        return implode(' ', array_map(fn (string $t) => "+{$t}*", $usable));
+        return implode(' ', array_map(fn (string $token) => "+{$token}*", $usable));
     }
 
     /**
-     * Returns a string suitable for a LIKE query, with all tokens joined by spaces and a trailing wildcard.
+     * Returns a collection of escaped LIKE terms, one per token.
+     * This is used for a safer fallback search that matches both name and description.
+     *
+     * @return list<string>
      */
+    public function toLikeTerms(): array
+    {
+        return array_map(
+            fn (string $token) => addcslashes($token, '%_\\') . '%',
+            $this->tokens
+        );
+    }
+
     public function toLikePrefix(): string
     {
         $joined = implode(' ', $this->tokens);
 
-        return addcslashes($joined, '%_\\').'%';
+        return addcslashes($joined, '%_\\') . '%';
     }
 }

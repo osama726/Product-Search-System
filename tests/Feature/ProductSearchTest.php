@@ -4,12 +4,12 @@ namespace Tests\Feature;
 
 use App\Models\Category;
 use App\Models\Product;
-use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\DatabaseTruncation;
 use Tests\TestCase;
 
 class ProductSearchTest extends TestCase
 {
-    use RefreshDatabase;
+    use DatabaseTruncation;
 
     private Category $category;
 
@@ -55,6 +55,17 @@ class ProductSearchTest extends TestCase
         $this->product(['name' => 'Gaming Laptop']);
 
         $this->getJson('/api/products/search?q='.urlencode('+laptop* -"(@~'))->assertOk();
+    }
+
+    public function test_short_search_matches_name_and_description_fallback(): void
+    {
+        $this->product(['name' => 'Desk', 'description' => 'TV stand for living room']);
+        $this->product(['name' => 'Travel Bag']);
+
+        $this->getJson('/api/products/search?q=tv')
+            ->assertOk()
+            ->assertJsonCount(1, 'data')
+            ->assertJsonPath('data.0.name', 'Desk');
     }
 
     public function test_price_range_category_and_availability_filters(): void
@@ -128,12 +139,12 @@ class ProductSearchTest extends TestCase
 
     public function test_validation_and_not_found_errors_use_same_envelope(): void
     {
-        $this->getJson('/api/v1/products/search?per_page=51')
+        $this->getJson('/api/products/search?per_page=51')
             ->assertStatus(422)
             ->assertJsonPath('success', false)
             ->assertJsonStructure(['success', 'message', 'data', 'errors' => ['per_page']]);
 
-        $this->getJson('/api/v1/nope')
+        $this->getJson('/api/nope')
             ->assertStatus(404)
             ->assertJsonPath('success', false);
     }

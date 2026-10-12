@@ -54,6 +54,6 @@ final class ApiExceptionHandler
 
     private function isApi(Request $request): bool
     {
-        return $request->is('api/*');
+        return preg_match('/^api(?:\/.*)?$/', $request->path()) === 1;
     }
 }

@@ -54,8 +54,16 @@ class ProductSearchService
             return;
         }
 
-        // If the boolean query is null, it means the search term is too short for full-text search, so we fall back to a "starts with" search on the product name.
-        $query->nameStartsWith($parser->toLikePrefix());
+        $likeTerms = $parser->toLikeTerms();
+
+        $query->where(function (Builder $likeQuery) use ($likeTerms) {
+            foreach ($likeTerms as $term) {
+                $likeQuery->orWhere(function (Builder $subQuery) use ($term) {
+                    $subQuery->where('products.name', 'like', $term)
+                        ->orWhere('products.description', 'like', $term);
+                });
+            }
+        });
     }
 
     private function applyFilters(Builder $query, ProductSearchData $data): void

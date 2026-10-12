@@ -86,8 +86,8 @@ class ProductSearchRequest extends FormRequest
     private function normalizeBoolean(mixed $value): mixed
     {
         return match (true) {
-            $value === 'true' => true,
-            $value === 'false' => false,
+            in_array($value, ['true', '1', 'yes', 'on'], true) => true,
+            in_array($value, ['false', '0', 'no', 'off'], true) => false,
             default => $value,
         };
     }
