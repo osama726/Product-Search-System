@@ -5,6 +5,7 @@ namespace App\Http\Requests\Api;
 use App\DTOs\ProductSearchData;
 use App\Enums\ProductSortField;
 use App\Enums\SortDirection;
+use App\Services\CategoryCache;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -36,7 +37,7 @@ class ProductSearchRequest extends FormRequest
             'q' =>                  ['nullable', 'string', 'max:100'],
             'min_price' =>          ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'max_price' =>          ['nullable', 'numeric', 'min:0', 'max:99999999.99', 'gte:min_price'],
-            'category_id' =>        ['nullable', 'integer', 'min:1', Rule::exists('categories', 'id')],
+            'category_id' =>        ['nullable', 'integer', 'min:1', Rule::in(app(CategoryCache::class)->ids())],
             'only_available' =>     ['nullable', 'boolean'],
             'sort' =>               ['nullable', Rule::enum(ProductSortField::class)],
             'direction' =>          ['nullable', Rule::enum(SortDirection::class)],

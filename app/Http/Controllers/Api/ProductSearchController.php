@@ -2,16 +2,20 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
+use App\Actions\Products\SearchProductsAction;
+use App\Http\Controllers\Api\ApiController;
+use App\Http\Requests\Api\ProductSearchRequest;
+use App\Http\Resources\ProductResource;
+use Illuminate\Http\JsonResponse;
 
-class ProductSearchController extends Controller
+class ProductSearchController extends ApiController
 {
-    /**
-     * Handle the incoming request.
-     */
-    public function __invoke(Request $request)
+    public function __invoke(ProductSearchRequest $request, SearchProductsAction $action): JsonResponse
     {
-        //
+        return $this->paginated(
+            $action->execute($request->toData()),
+            ProductResource::class,
+            'Products retrieved successfully.'
+        );
     }
 }
