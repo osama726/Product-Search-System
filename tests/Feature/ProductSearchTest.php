@@ -2,9 +2,14 @@
 
 namespace Tests\Feature;
 
+use App\Actions\Products\SearchProductsAction;
+use App\DTOs\ProductSearchData;
+use App\Enums\ProductSortField;
+use App\Enums\SortDirection;
 use App\Models\Category;
 use App\Models\Product;
 use Illuminate\Foundation\Testing\DatabaseTruncation;
+use Illuminate\Support\Facades\Cache;
 use Tests\TestCase;
 
 class ProductSearchTest extends TestCase
@@ -147,5 +152,29 @@ class ProductSearchTest extends TestCase
         $this->getJson('/api/nope')
             ->assertStatus(404)
             ->assertJsonPath('success', false);
+    }
+
+    public function test_repeated_searches_are_cached_for_speed(): void
+    {
+        $this->product(['name' => 'Gaming Laptop']);
+        $this->product(['name' => 'Laptop Stand']);
+
+        $requestData = new ProductSearchData(
+            query: 'laptop',
+            minPrice: null,
+            maxPrice: null,
+            categoryId: null,
+            onlyAvailable: false,
+            sort: ProductSortField::Relevance,
+            direction: SortDirection::Desc,
+            perPage: 10,
+            page: 1,
+        );
+
+        $this->assertNull(Cache::get(SearchProductsAction::cacheKey($requestData)));
+
+        $this->getJson('/api/products/search?q=laptop&per_page=10');
+
+        $this->assertNotNull(Cache::get(SearchProductsAction::cacheKey($requestData)));
     }
 }

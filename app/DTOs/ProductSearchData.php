@@ -16,5 +16,6 @@ final readonly class ProductSearchData
         public ProductSortField $sort,
         public SortDirection $direction,
         public int $perPage,
+        public int $page = 1,
     ) {}
 }

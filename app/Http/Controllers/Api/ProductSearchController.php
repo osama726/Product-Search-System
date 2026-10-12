@@ -13,7 +13,7 @@ class ProductSearchController extends ApiController
     public function __invoke(ProductSearchRequest $request, SearchProductsAction $action): JsonResponse
     {
         return $this->paginated(
-            $action->execute($request->toData()),
+            $action($request->toData()),
             ProductResource::class,
             'Products retrieved successfully.'
         );

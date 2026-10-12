@@ -80,6 +80,7 @@ class ProductSearchRequest extends FormRequest
             sort: $sort,
             direction: isset($v['direction']) ? SortDirection::from($v['direction']) : $defaultDirection,
             perPage: (int) ($v['per_page'] ?? self::DEFAULT_PER_PAGE),
+            page: (int) ($v['page'] ?? 1),
         );
     }
 
