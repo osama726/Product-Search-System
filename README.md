@@ -1,6 +1,6 @@
 ﻿# Product Search System
 
-![Product Search UI](public/images/product-search-demo.svg)
+![Product Search UI](public/images/Screenshot 2026-10-12 172517.png)
 
 A Laravel-based product search API designed for large datasets, advanced filtering, flexible sorting, and paginated responses.
 
